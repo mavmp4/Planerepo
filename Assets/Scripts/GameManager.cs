@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
 
     public GameObject playerPrefab;
     public GameObject enemyOnePrefab;
+    public GameObject enemyTwoPrefab;
     public GameObject cloudPrefab;
 
     public TextMeshProUGUI livesText;
@@ -26,7 +27,17 @@ public class GameManager : MonoBehaviour
         score = 0;
         Instantiate(playerPrefab, transform.position, Quaternion.identity);
         CreateSky();
-        InvokeRepeating("CreateEnemy", 1, 3);
+
+        if (enemyOnePrefab != null)
+            InvokeRepeating("CreateEnemy", 1f, 3f);
+        else
+            Debug.LogWarning("enemyOnePrefab not assigned in GameManager.");
+
+        // Enemy two: starts at 2s, repeats every 5s (different timing)
+        if (enemyTwoPrefab != null)
+            InvokeRepeating("CreateEnemyTwo", 2f, 5f);
+        else
+            Debug.LogWarning("enemyTwoPrefab not assigned in GameManager.");
     }
 
     // Update is called once per frame
@@ -38,6 +49,14 @@ public class GameManager : MonoBehaviour
     void CreateEnemy()
     {
         Instantiate(enemyOnePrefab, new Vector3(Random.Range(-horizontalScreenSize, horizontalScreenSize) * 0.9f, verticalScreenSize, 0), Quaternion.Euler(180, 0, 0));
+    }
+
+void CreateEnemyTwo()
+    {
+        // Spawn enemy two near the top at a random X position (different spawn timing/pattern)
+        Instantiate(enemyTwoPrefab,
+            new Vector3(Random.Range(-horizontalScreenSize, horizontalScreenSize) * 0.9f, verticalScreenSize, 0),
+            Quaternion.identity);
     }
 
     void CreateSky()

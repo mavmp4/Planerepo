@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyOne : MonoBehaviour
+public class EnemyTwo : MonoBehaviour
 {
-
     public GameObject explosionPrefab;
     
     private GameManager gameManager;
@@ -37,3 +34,4 @@ public class EnemyOne : MonoBehaviour
         }
     }
 }
+
