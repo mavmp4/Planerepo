@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     public GameObject cloudPrefab;
 
     public TextMeshProUGUI livesText;
+    public TextMeshProUGUI scoreText;   // Change one
 
     public float horizontalScreenSize;
     public float verticalScreenSize;
@@ -25,6 +26,7 @@ public class GameManager : MonoBehaviour
         horizontalScreenSize = 10f;
         verticalScreenSize = 6.5f;
         score = 0;
+        UpdateScoreText(); // Change 2
         Instantiate(playerPrefab, transform.position, Quaternion.identity);
         CreateSky();
 
@@ -70,6 +72,13 @@ void CreateEnemyTwo()
     public void AddScore(int earnedScore)
     {
         score = score + earnedScore;
+        UpdateScoreText(); // Change 3
+    }
+    //change 4
+    public void UpdateScoreText()
+    {
+        if (scoreText != null)
+            scoreText.text = "Score: " + score;
     }
 
     public void ChangeLivesText (int currentLives)
