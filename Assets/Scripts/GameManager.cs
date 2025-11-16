@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public GameObject enemyOnePrefab;
     public GameObject enemyTwoPrefab;
     public GameObject cloudPrefab;
+    public GameObject coinPrefab; //change 5
 
     public TextMeshProUGUI livesText;
     public TextMeshProUGUI scoreText;   // Change one
@@ -40,6 +41,12 @@ public class GameManager : MonoBehaviour
             InvokeRepeating("CreateEnemyTwo", 2f, 5f);
         else
             Debug.LogWarning("enemyTwoPrefab not assigned in GameManager.");
+
+        // Coin spawn Change 6. If concerned, rework startCoroutine into InvokeRepeating
+        if (coinPrefab != null)
+            startCoroutine(CoinSpawnLoop());
+        else
+            Debug.LogWarning("coinPrefab not assinged in GameManager.");
     }
 
     // Update is called once per frame
@@ -69,6 +76,26 @@ void CreateEnemyTwo()
         }
         
     }
+
+    //Change 7. Random coin loop timer. If it really comes down to it, you could probably use the enemy spawn logic to make this work
+    IEnumerator CoinSpawnLoop()
+    {
+        while (true)
+        {
+            float waitTime = Random.Range(minCoinSpawnTime, maxCoinSpawnTime);
+            yield return new WaitForSeconds(waitTime);
+
+            SpawnCoin();
+        }
+    }
+
+    //Change 8. Coin spawn logic. I assume this would work the same as enemy spawn logic if push comes to shove
+    void SpawnCoin()
+    {
+        Vector3 spawnPos = new Vector3(Random.Range(-horizontalScreenSize, horizontalScreenSize), Random.Range(-verticalScreenSize, verticalScreenSize), 0f);
+        Instantiate(coinPrefab, spawnPos, Quaternion.identity);
+    }
+    
     public void AddScore(int earnedScore)
     {
         score = score + earnedScore;
