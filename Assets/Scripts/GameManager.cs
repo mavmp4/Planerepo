@@ -3,34 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.SceneManagement;
-using Unity.VisualScripting;
 
 public class GameManager : MonoBehaviour
 {
 
     public GameObject playerPrefab;
     public GameObject enemyOnePrefab;
+    public GameObject enemyTwoPrefab;
     public GameObject cloudPrefab;
-    public GameObject gameOverText;
-    public GameObject restartText;
-    public GameObject powerupPrefab;
-    public GameObject audioPlayer;
-
-    public AudioClip powerupSound;
-    public AudioClip powerdownSound;
+    public GameObject coinPrefab; //change 5
 
     public TextMeshProUGUI livesText;
-    public TextMeshProUGUI scoreText;
-    public TextMeshProUGUI powerupText;
-    
+    public TextMeshProUGUI scoreText;   // Change one
+
     public float horizontalScreenSize;
     public float verticalScreenSize;
 
-    public int score;
-    public int cloudMove;
+    public float minCoinSpawnTime = 3f; //new changes
+    public float maxCointSpawnTime = 7f; //new changes
 
-    private bool gameOver;
+    public int score;
 
     // Start is called before the first frame update
     void Start()
@@ -38,23 +30,32 @@ public class GameManager : MonoBehaviour
         horizontalScreenSize = 10f;
         verticalScreenSize = 6.5f;
         score = 0;
-        cloudMove = 1;
-        gameOver = false;
-        AddScore(0);
+        UpdateScoreText(); // Change 2
         Instantiate(playerPrefab, transform.position, Quaternion.identity);
         CreateSky();
-        InvokeRepeating("CreateEnemy", 1, 3);
-        StartCoroutine(SpawnPowerup());
-        powerupText.text = "No powerups yet!";
+
+        if (enemyOnePrefab != null)
+            InvokeRepeating("CreateEnemy", 1f, 3f);
+        else
+            Debug.LogWarning("enemyOnePrefab not assigned in GameManager.");
+
+        // Enemy two: starts at 2s, repeats every 5s (different timing)
+        if (enemyTwoPrefab != null)
+            InvokeRepeating("CreateEnemyTwo", 2f, 5f);
+        else
+            Debug.LogWarning("enemyTwoPrefab not assigned in GameManager.");
+
+        // Coin spawn Change 6. If concerned, rework startCoroutine into InvokeRepeating
+        if (coinPrefab != null)
+            StartCoroutine(CoinSpawnLoop());
+        else
+            Debug.LogWarning("coinPrefab not assinged in GameManager.");
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(gameOver && Input.GetKeyDown(KeyCode.R))
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
+        
     }
 
     void CreateEnemy()
@@ -62,9 +63,12 @@ public class GameManager : MonoBehaviour
         Instantiate(enemyOnePrefab, new Vector3(Random.Range(-horizontalScreenSize, horizontalScreenSize) * 0.9f, verticalScreenSize, 0), Quaternion.Euler(180, 0, 0));
     }
 
-    void CreatePowerup()
+void CreateEnemyTwo()
     {
-        Instantiate(powerupPrefab, new Vector3(Random.Range(-horizontalScreenSize * 0.8f, horizontalScreenSize * 0.8f), Random.Range(-verticalScreenSize * 0.8f, verticalScreenSize * 0.8f), 0), Quaternion.identity);
+        // Spawn enemy two near the top at a random X position (different spawn timing/pattern)
+        Instantiate(enemyTwoPrefab,
+            new Vector3(Random.Range(-horizontalScreenSize, horizontalScreenSize) * 0.9f, verticalScreenSize, 0),
+            Quaternion.identity);
     }
 
     void CreateSky()
@@ -76,67 +80,39 @@ public class GameManager : MonoBehaviour
         
     }
 
-    public void ManagePowerupText(int powerupType)
+    //Change 7. Random coin loop timer. If it really comes down to it, you could probably use the enemy spawn logic to make this work
+    IEnumerator CoinSpawnLoop()
     {
-        switch (powerupType)
+        while (true)
         {
-            case 1:
-                powerupText.text = "Speed!";
-                break;
-            case 2:
-                powerupText.text = "Double Weapon!";
-                break;
-            case 3:
-                powerupText.text = "Triple Weapon!";
-                break;
-            case 4:
-                powerupText.text = "Shield!";
-                break;
-            default:
-                powerupText.text = "No powerups yet!";
-                break;
+            float waitTime = Random.Range(minCoinSpawnTime, maxCoinSpawnTime);
+            yield return new WaitForSeconds(waitTime);
+
+            SpawnCoin();
         }
     }
 
-    IEnumerator SpawnPowerup()
+    //Change 8. Coin spawn logic. I assume this would work the same as enemy spawn logic if push comes to shove
+    void SpawnCoin()
     {
-        float spawnTime = Random.Range(3, 5); 
-        yield return new WaitForSeconds(spawnTime);
-        CreatePowerup();
-        StartCoroutine(SpawnPowerup());
+        Vector3 spawnPos = new Vector3(Random.Range(-horizontalScreenSize, horizontalScreenSize), Random.Range(-verticalScreenSize, verticalScreenSize), 0f);
+        Instantiate(coinPrefab, spawnPos, Quaternion.identity);
     }
-
-    public void PlaySound(int whichSound)
-    {
-        switch (whichSound)
-        {
-            case 1:
-                audioPlayer.GetComponent<AudioSource>().PlayOneShot(powerupSound);
-                break;
-            case 2:
-                audioPlayer.GetComponent<AudioSource>().PlayOneShot(powerdownSound);
-                break;
-        }
-    }
-
+    
     public void AddScore(int earnedScore)
     {
         score = score + earnedScore;
-        scoreText.text = "Score: " + score;
+        UpdateScoreText(); // Change 3
+    }
+    //change 4
+    public void UpdateScoreText()
+    {
+        if (scoreText != null)
+            scoreText.text = "Score: " + score;
     }
 
     public void ChangeLivesText (int currentLives)
     {
         livesText.text = "Lives: " + currentLives;
     }
-
-    public void GameOver()
-    {
-        gameOverText.SetActive(true);
-        restartText.SetActive(true);
-        gameOver = true;
-        CancelInvoke();
-        cloudMove = 0;
-    }
-
 }
