@@ -19,6 +19,9 @@ public class GameManager : MonoBehaviour
     public float horizontalScreenSize;
     public float verticalScreenSize;
 
+    public float minCoinSpawnTime = 3f; //new changes
+    public float maxCointSpawnTime = 7f; //new changes
+
     public int score;
 
     // Start is called before the first frame update
@@ -44,7 +47,7 @@ public class GameManager : MonoBehaviour
 
         // Coin spawn Change 6. If concerned, rework startCoroutine into InvokeRepeating
         if (coinPrefab != null)
-            startCoroutine(CoinSpawnLoop());
+            StartCoroutine(CoinSpawnLoop());
         else
             Debug.LogWarning("coinPrefab not assinged in GameManager.");
     }
